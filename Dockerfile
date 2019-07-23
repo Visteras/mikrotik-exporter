@@ -1,10 +1,16 @@
-FROM debian:9.9-slim
+FROM golang:1.12 as builder
 
-EXPOSE 9436
+RUN mkdir -p $GOPATH/src/github.com/Visteras/mikrotik-exporter
+COPY ./ $GOPATH/src/github.com/Visteras/mikrotik-exporter
+WORKDIR $GOPATH/src/github.com/Visteras/mikrotik-exporter
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o mikrotik-exporter .
 
-COPY scripts/start.sh /app/
-COPY dist/mikrotik-exporter_linux_amd64 /app/mikrotik-exporter
+FROM alpine
 
+RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/* && mkdir -p /app
+COPY --from=builder /go/src/github.com/Visteras/mikrotik-exporter/mikrotik-exporter /app/mikrotik-exporter
+COPY --from=builder /go/src/github.com/Visteras/mikrotik-exporter/scripts/start.sh /app/
 RUN chmod 755 /app/*
 
+EXPOSE 9436
 ENTRYPOINT ["/app/start.sh"]
