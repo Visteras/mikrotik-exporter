@@ -9,8 +9,8 @@ FROM alpine
 
 RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/* && mkdir -p /app
 COPY --from=builder /go/src/github.com/Visteras/mikrotik-exporter/mikrotik-exporter /app/mikrotik-exporter
-COPY --from=builder /go/src/github.com/Visteras/mikrotik-exporter/scripts/start.sh /app/
+COPY --from=builder /go/src/github.com/Visteras/mikrotik-exporter/scripts/start.sh /app/start.sh
 RUN chmod 755 /app/*
 
 EXPOSE 9436
-ENTRYPOINT ["/app/start.sh"]
+CMD ["/app/start.sh"]
